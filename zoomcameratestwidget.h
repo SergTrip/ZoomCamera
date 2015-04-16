@@ -43,6 +43,7 @@ public:
 
 protected:
     // PvGenEventSink implementation
+    // Вызывается при изменении параметров
     void OnParameterUpdate( PvGenParameter *aParameter );
 
     // Вызывается при отображении окна
@@ -60,8 +61,8 @@ protected:
     // Остановить захват изображений
     void StopAcquisition    ();
 
-    // Показать стандартное окно
-//    void ShowGenWindow  ( PvGenBrowserWnd **aWnd, PvGenParameterArray *aParams, const CString &aTitle );
+    // Сформировать окно настроек
+    void ShowGenWindow  ( PvGenBrowserWnd **aWnd, PvGenParameterArray *aParams, const QString &aTitle );
     // Закрыть стандартное окно
     void CloseGenWindow ( PvGenBrowserWnd **aWnd );
 
@@ -99,8 +100,11 @@ protected:
     DisplayThread*      m_poDisplayThread;
 
     // Указатели на список окон
+    // Device Control
     PvGenBrowserWnd*    mDeviceWnd;
+    // Communication Control
     PvGenBrowserWnd*    mCommunicationWnd;
+    // Image Stream Control
     PvGenBrowserWnd*    mStreamParametersWnd;
 
     // Объект окна для воспроизведения изображения
@@ -110,7 +114,7 @@ protected:
     PvAcquisitionStateManager*  m_poAcquisitionStateManager;
 
 private:
-    Ui::ZoomCameraTestWidget *ui;
+    Ui::ZoomCameraTestWidget*   ui;
 };
 
 #endif // ZOOMCAMERATESTWIDGET_H

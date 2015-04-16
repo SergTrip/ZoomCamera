@@ -100,6 +100,49 @@ void ZoomCameraTestWidget::StopStreaming()
     }
 }
 
+void ZoomCameraTestWidget::OnParameterUpdate(PvGenParameter *aParameter)
+{
+    bool bBufferResize = false;
+    PvString lName;
+
+    // Получить имя параметров
+    aParameter->GetName( lName );
+
+    // Изменить содержание списков режимов ????
+//    if ( ( lName == "AcquisitionMode"   ) &&
+//         ( mModeCombo.GetSafeHwnd() != 0 ) )
+//    {
+//        bool lAvailable = false;
+//        bool lWritable  = false;
+
+//        aParameter->IsAvailable( lAvailable );
+//        if ( lAvailable )
+//        {
+//            aParameter->IsWritable( lWritable );
+//        }
+
+//        mModeCombo.EnableWindow( lAvailable && lWritable );
+
+//        PvGenEnum *lEnum = dynamic_cast<PvGenEnum *>( aParameter );
+//        if ( lEnum != NULL )
+//        {
+//            int64_t lEEValue = 0;
+//            lEnum->GetValue( lEEValue );
+
+//            for ( int i = 0; i < mModeCombo.GetCount(); i++ )
+//            {
+//                DWORD_PTR lData = mModeCombo.GetItemData( i );
+//                if ( lData == lEEValue )
+//                {
+//                    mModeCombo.SetCurSel( i );
+//                    break;
+//                }
+//            }
+//        }
+//    }
+
+}
+
 void ZoomCameraTestWidget::showEvent(QShowEvent *event)
 {
     // Вызвать функцию базовго класса
@@ -217,7 +260,6 @@ void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
     }
 
     //**** Подготовка строк инфомации о подключаемом устройстве ****************
-    /*
     PvString lManufacturerStr   = aDI->GetVendorName();
     PvString lModelNameStr      = aDI->GetModelName();
     PvString lDeviceVersionStr  = aDI->GetVersion();
@@ -247,12 +289,12 @@ void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
     PvString lNameStr = aDI->GetUserDefinedName();
 
     // Устанавливаем информацию об устройстве
-    mManufacturerEdit.SetWindowText   ( lManufacturerStr );
-    mModelEdit.SetWindowText          ( lModelNameStr );
-    mIPEdit.SetWindowText             ( lIPStr );
-    mMACEdit.SetWindowText            ( lMACStr );
-    mGUIDEdit.SetWindowText           ( lDeviceGUIDStr );
-    mNameEdit.SetWindowText           ( lNameStr );
+//    mManufacturerEdit.SetWindowText   ( lManufacturerStr );
+//    mModelEdit.SetWindowText          ( lModelNameStr );
+//    mIPEdit.SetWindowText             ( lIPStr );
+//    mMACEdit.SetWindowText            ( lMACStr );
+//    mGUIDEdit.SetWindowText           ( lDeviceGUIDStr );
+//    mNameEdit.SetWindowText           ( lNameStr );
 
     // Get acquisition mode GenICam parameter
     PvGenEnum*  lMode           = lGenDevice->GetEnum( "AcquisitionMode" );
@@ -261,7 +303,8 @@ void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
     // Узнать количество доступных режимов работы камеры
     lMode->GetEntriesCount( lEntriesCount );
 
-    // Заполняем выпадающих список режимов работы камеры
+    //*****  Заполняем выпадающих список режимов работы камеры
+    /*
     // Fill acquisition mode combo box
     mModeCombo.ResetContent();
     // Для каждого режима
@@ -295,6 +338,7 @@ void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
         }
     }
     */
+
     // *************************************************************************
 
     // НУЖНО УСТАНОВИТЬ РЕЖИМ ПО УМОЛЧАНИЮ !!!!
@@ -329,9 +373,9 @@ void ZoomCameraTestWidget::Disconnect()
     }
 
     // Close all configuration child windows
-    CloseGenWindow( &mDeviceWnd );
-    CloseGenWindow( &mCommunicationWnd );
-    CloseGenWindow( &mStreamParametersWnd );
+    CloseGenWindow( &mDeviceWnd             );
+    CloseGenWindow( &mCommunicationWnd      );
+    CloseGenWindow( &mStreamParametersWnd   );
 
     // If streaming, stop streaming
     StopStreaming();
@@ -457,7 +501,9 @@ void ZoomCameraTestWidget::EnableInterface()
 
     // Настроить состояние элементов диалога
 //    GetDlgItem( IDC_CONNECT_BUTTON          )-> EnableWindow( !lConnected );
+    ui->pushButton_Connect      ->setEnabled( !lConnected );
 //    GetDlgItem( IDC_DISCONNECT_BUTTON       )-> EnableWindow( lConnected );
+    ui->pushButton_Disconnect   ->setEnabled( lConnected );
 
 //    GetDlgItem( IDC_COMMUNICATION_BUTTON    )-> EnableWindow( lConnected );
 //    GetDlgItem( IDC_DEVICE_BUTTON           )-> EnableWindow( lConnected );

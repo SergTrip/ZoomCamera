@@ -4,63 +4,59 @@
 #define DEFAULT_PAYLOAD_SIZE ( 1920 * 1080 * 2 )
 
 ZoomCameraTestWidget::ZoomCameraTestWidget(QWidget *parent) :
-    QWidget                     ( parent)
-    , m_bNeedInit               ( false )
-    , mDeviceWnd                ( NULL  )
-    , mCommunicationWnd         ( NULL  )
-    , mStreamParametersWnd      ( NULL  )
-    , m_poDisplayThread         ( NULL  )
-    , m_bAcquiringImages          ( false )
-    , m_poAcquisitionStateManager  ( NULL  )
-    , ui                        ( new Ui::ZoomCameraTestWidget )
+    QWidget                         ( parent    )
+    , m_bNeedInit                   ( false     )
+    , m_poDeviceCtrlWnd             ( 0         )
+    , m_poCommunicationCtrlWnd      ( 0         )
+    , m_poStreamParametersCtrlWnd   ( 0         )
+    , m_bAcquiringImages            ( false     )
+    , m_poAcquisitionStateManager   ( 0         )
+    , ui                            ( new Ui::ZoomCameraTestWidget )
 {
     ui->setupUi( this );
 
-    // Создать экземпляр потока изображения
-    m_poDisplayThread = new DisplayThread( &m_oDisplay );
-
     // Обнулить указатели
-    m_poDevice      = NULL;
-    m_poStream      = NULL;
-    m_poPipeline    = NULL;
+    m_poDevice      = 0;
+    m_poStream      = 0;
+    m_poPipeline    = 0;
 }
 
 ZoomCameraTestWidget::~ZoomCameraTestWidget()
 {
     // Если был создан экземпляр потока
-    if ( m_poDisplayThread != NULL )
-    {
-        // удалить экземпляр
-        delete m_poDisplayThread;
-        // поменять значение
-        m_poDisplayThread = NULL;
-    }
+//    if ( m_poDisplayThread != 0 )
+//    {
+//        // удалить экземпляр
+//        delete m_poDisplayThread;
+//        // поменять значение
+//        m_poDisplayThread = 0;
+//    }
 
     //
-    if ( m_poAcquisitionStateManager != NULL )
+    if ( m_poAcquisitionStateManager != 0 )
     {
         delete m_poAcquisitionStateManager;
-        m_poAcquisitionStateManager = NULL;
+        m_poAcquisitionStateManager = 0;
     }
 
     // Если был создан экземпляр процесса
-    if ( m_poDevice != NULL )
+    if ( m_poDevice != 0 )
     {
         // Объект создан фабрикой класса
         PvDevice::Free( m_poDevice );
     }
 
     // Если был создан  экземпляр потока
-    if ( m_poStream != NULL )
+    if ( m_poStream != 0 )
     {
         // Объект создан фабрикой класса
         PvStream::Free( m_poStream );
     }
 
-    if ( m_poPipeline != NULL )
+    if ( m_poPipeline != 0 )
     {
         delete m_poPipeline;
-        m_poPipeline = NULL;
+        m_poPipeline = 0;
     }
 
     delete ui;
@@ -69,22 +65,30 @@ ZoomCameraTestWidget::~ZoomCameraTestWidget()
 void ZoomCameraTestWidget::StartStreaming()
 {
     // Start threads
-    m_poDisplayThread->Start        ( m_poPipeline, m_poDevice->GetParameters() );
-    m_poDisplayThread->SetPriority  ( THREAD_PRIORITY_ABOVE_NORMAL              );
+//    m_poDisplayThread->Start        ( m_poPipeline, m_poDevice->GetParameters() );
+//    m_poDisplayThread->SetPriority  ( THREAD_PRIORITY_ABOVE_NORMAL              );
+
+
+    (ui->widget)->Start        ( m_poPipeline, m_poDevice->GetParameters() );
+    (ui->widget)->SetPriority  ( THREAD_PRIORITY_ABOVE_NORMAL              );
 
     // Start pipeline
     m_poPipeline->Start();
+
+    qDebug() << "Pipeline started...";
 }
 
 void ZoomCameraTestWidget::StopStreaming()
 {
     // Stop display thread
-    if ( m_poDisplayThread != NULL )
-    {
-        m_poDisplayThread->Stop( false );
-    }
+//    if ( m_poDisplayThread != 0 )
+//    {
+//        m_poDisplayThread->Stop( false );
+//    }
 
-    if ( m_poPipeline != NULL )
+    (ui->widget)->Stop( false );
+
+    if ( m_poPipeline != 0 )
     {
         // Stop stream thread
         if ( m_poPipeline->IsStarted() )
@@ -94,37 +98,45 @@ void ZoomCameraTestWidget::StopStreaming()
     }
 
     // Wait for display thread to be stopped
-    if ( m_poDisplayThread != NULL )
-    {
-        m_poDisplayThread->WaitComplete();
-    }
+//    if ( m_poDisplayThread != 0 )
+//    {
+//        m_poDisplayThread->WaitComplete();
+//    }
+    ui->widget->WaitComplete();
 }
 
 void ZoomCameraTestWidget::OnParameterUpdate(PvGenParameter *aParameter)
 {
-    bool bBufferResize = false;
-    PvString lName;
+    bool        bBufferResize = false;
+    PvString    lName;
 
-    // Получить имя параметров
+    // Получить имя параметра для изменения
     aParameter->GetName( lName );
 
-    // Изменить содержание списков режимов ????
-//    if ( ( lName == "AcquisitionMode"   ) &&
-//         ( mModeCombo.GetSafeHwnd() != 0 ) )
-//    {
-//        bool lAvailable = false;
-//        bool lWritable  = false;
+    qDebug() << " ZoomCameraTestWidget::OnParameterUpdate - \
+                    It's may be something IMPOTENT !!!" ;
 
-//        aParameter->IsAvailable( lAvailable );
-//        if ( lAvailable )
-//        {
-//            aParameter->IsWritable( lWritable );
-//        }
+    // Если нужно изменить режим отображения и комбо бокс доступен
+    if ( ( lName == "AcquisitionMode"   )
+         /*&& ( mModeCombo.GetSafeHwnd() != 0 ) */)
+    {
+        bool lAvailable = false;
+        bool lWritable  = false;
 
-//        mModeCombo.EnableWindow( lAvailable && lWritable );
+        // Проверить, доступен ли сейчас параметр
+        aParameter->IsAvailable( lAvailable );
+        // Если доступен
+        if ( lAvailable )
+        {
+            // Доступен ли он для записи
+            aParameter->IsWritable( lWritable );
+        }
 
-//        PvGenEnum *lEnum = dynamic_cast<PvGenEnum *>( aParameter );
-//        if ( lEnum != NULL )
+        // mModeCombo.EnableWindow( lAvailable && lWritable );
+
+        PvGenEnum *lEnum = dynamic_cast<PvGenEnum *>( aParameter );
+
+//        if ( lEnum != 0 )
 //        {
 //            int64_t lEEValue = 0;
 //            lEnum->GetValue( lEEValue );
@@ -139,7 +151,7 @@ void ZoomCameraTestWidget::OnParameterUpdate(PvGenParameter *aParameter)
 //                }
 //            }
 //        }
-//    }
+    }
 
 }
 
@@ -192,10 +204,10 @@ void ZoomCameraTestWidget::closeEvent(QCloseEvent *event)
 void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
 {
     // Если указатель рабочий
-    Q_ASSERT( aDI != NULL );
+    Q_ASSERT( aDI != 0 );
 
     // Еще раз проверить указатель
-    if ( aDI == NULL )
+    if ( aDI == 0 )
     {
         return;
     }
@@ -251,6 +263,7 @@ void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
 
     // Создаем канал
     m_poPipeline = new PvPipeline( m_poStream );
+
     // Register to all events of the parameters in the device's node map
     PvGenParameterArray* lGenDevice = m_poDevice->GetParameters();
     // Регистрация всех событий
@@ -268,7 +281,7 @@ void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
     PvString lIPStr     = "N/A";
     PvString lMACStr    = "N/A";
 
-    if ( lDIGEV != NULL )
+    if ( lDIGEV != 0 )
     {
         // IP (GigE Vision only)
         lIPStr = lDIGEV->GetIPAddress();
@@ -279,7 +292,7 @@ void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
 
     // USB3 Vision only parameters
     PvString lDeviceGUIDStr = "N/A";
-    if ( lDIU3V != NULL )
+    if ( lDIU3V != 0 )
     {
         // Device GUID (USB3 Vision only)
         lDeviceGUIDStr = lDIU3V->GetDeviceGUID();
@@ -310,7 +323,7 @@ void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
     // Для каждого режима
     for ( uint32_t i = 0; i < lEntriesCount; i++ )
     {
-        const PvGenEnumEntry* lEntry = NULL;
+        const PvGenEnumEntry* lEntry = 0;
         lMode->GetEntryByIndex( i, &lEntry );
 
         if ( lEntry->IsAvailable() )
@@ -357,12 +370,14 @@ void ZoomCameraTestWidget::Connect(const PvDeviceInfo *aDI)
 
     // Sync up UI
     EnableInterface();
+
+    qDebug() << "Connecting done...";
 }
 
 void ZoomCameraTestWidget::Disconnect()
 {
 
-    if ( m_poDevice != NULL )
+    if ( m_poDevice != 0 )
     {
         // Unregister all events of the parameters in the device's node map
         PvGenParameterArray *lGenDevice = m_poDevice->GetParameters();
@@ -373,18 +388,18 @@ void ZoomCameraTestWidget::Disconnect()
     }
 
     // Close all configuration child windows
-    CloseGenWindow( &mDeviceWnd             );
-    CloseGenWindow( &mCommunicationWnd      );
-    CloseGenWindow( &mStreamParametersWnd   );
+    CloseGenWindow( &m_poDeviceCtrlWnd             );
+    CloseGenWindow( &m_poCommunicationCtrlWnd      );
+    CloseGenWindow( &m_poStreamParametersCtrlWnd   );
 
     // If streaming, stop streaming
     StopStreaming();
 
     // Release acquisition state manager
-    if ( m_poAcquisitionStateManager != NULL )
+    if ( m_poAcquisitionStateManager != 0 )
     {
         delete m_poAcquisitionStateManager;
-        m_poAcquisitionStateManager = NULL;
+        m_poAcquisitionStateManager = 0;
     }
 
     // Reset device ID - can be called by the destructor when the window
@@ -399,18 +414,18 @@ void ZoomCameraTestWidget::Disconnect()
 //        mNameEdit.SetWindowText         ( _T( "" ) );
 //    }
 
-    if ( m_poDevice != NULL )
+    if ( m_poDevice != 0 )
     {
         // Объект создан фабрикой класса
         PvDevice::Free( m_poDevice );
-        m_poDevice = NULL;
+        m_poDevice = 0;
     }
 
-    if ( m_poStream != NULL )
+    if ( m_poStream != 0 )
     {
         // Объект создан фабрикой класса
         PvStream::Free( m_poStream );
-        m_poStream = NULL;
+        m_poStream = 0;
     }
 
     EnableInterface();
@@ -421,7 +436,7 @@ void ZoomCameraTestWidget::StartAcquisition()
     // Get payload size from device
     int64_t lPayloadSizeValue = DEFAULT_PAYLOAD_SIZE;
 
-    if ( ( m_poDevice != NULL ) && m_poDevice->IsConnected() )
+    if ( ( m_poDevice != 0 ) && m_poDevice->IsConnected() )
     {
         lPayloadSizeValue = m_poDevice->GetPayloadSize();
     }
@@ -440,6 +455,8 @@ void ZoomCameraTestWidget::StartAcquisition()
     m_poStream->GetParameters()->ExecuteCommand( "Reset" );
 
     m_poAcquisitionStateManager->Start();
+
+    qDebug() << "Acquisition strted...";
 }
 
 void ZoomCameraTestWidget::StopAcquisition()
@@ -447,38 +464,52 @@ void ZoomCameraTestWidget::StopAcquisition()
     m_poAcquisitionStateManager->Stop();
 }
 
-//void ZoomCameraTestWidget::ShowGenWindow(PvGenBrowserWnd **aWnd, PvGenParameterArray *aParams, const CString &aTitle)
-//{
-//    if ( ( *aWnd ) != NULL )
-//    {
-//        if ( ( *aWnd )->GetHandle() != 0 )
-//        {
-//            CWnd lWnd;
-//            lWnd.Attach( ( *aWnd )->GetHandle() );
+void ZoomCameraTestWidget::ShowGenWindow(   PvGenBrowserWnd     **aWnd,
+                                            PvGenParameterArray  *aParams,
+                                            const QString        &aTitle    )
+{
+    // Если предан не пустой указатель
+    if ( ( *aWnd ) != 0 )
+    {
+        // Если ???
+        if ( ( *aWnd )->GetHandle() != 0 )
+        {
+            // Найти виджет с таким хендлом
+            QWidget* lWnd = 0;
+            lWnd = QWidget::find( (WId)(( *aWnd )->GetHandle()) );
 
-//            // Window already visible, give it focus and bring it on top
-//            lWnd.BringWindowToTop();
-//            lWnd.SetFocus();
+            // Если виджет нашелся
+            if( lWnd != 0)
+            {
+                lWnd->activateWindow();
+                // Установить фокус
+                // lWnd->setFocus();
+                return;
+            }
+            else
+            {
+                qDebug() << "Can't fined exesting window..";
+            }
 
-//            lWnd.Detach();
-//            return;
-//        }
+        }
 
-//        // Window object exists but was closed/destroyed. Free it before re-creating
-//        CloseGenWindow( aWnd );
-//    }
+        // Window object exists but was closed/destroyed.
+        // Free it before re-creating
+        CloseGenWindow( aWnd );
+    }
 
-//    // Create, assign parameters, set title and show modeless
-//    ( *aWnd ) = new PvGenBrowserWnd;
-//    ( *aWnd )->SetTitle( PvString( aTitle ) );
-//    ( *aWnd )->SetGenParameterArray( aParams );
-//    ( *aWnd )->ShowModeless( GetSafeHwnd() );
-//}
+    // Create, assign parameters, set title and show modeless
+    ( *aWnd ) = new PvGenBrowserWnd;
+
+    ( *aWnd )->SetTitle             ( PvString( (char*)aTitle.data())    );
+    ( *aWnd )->SetGenParameterArray ( aParams               );
+    ( *aWnd )->ShowModeless         ( (HWND)(this->winId()) );
+}
 
 void ZoomCameraTestWidget::CloseGenWindow(PvGenBrowserWnd **aWnd)
 {
     // If the window object does not even exist, do nothing
-    if ( ( *aWnd ) == NULL )
+    if ( ( *aWnd ) == 0 )
     {
         return;
     }
@@ -491,34 +522,33 @@ void ZoomCameraTestWidget::CloseGenWindow(PvGenBrowserWnd **aWnd)
 
     // Finally, release the window object
     delete ( *aWnd );
-    ( *aWnd ) = NULL;
+    ( *aWnd ) = 0;
 }
 
 void ZoomCameraTestWidget::EnableInterface()
 {
     // Устройство создано и подключено
-    bool lConnected = ( m_poDevice != NULL ) && m_poDevice->IsConnected();
+    bool lConnected = ( m_poDevice != 0 ) && m_poDevice->IsConnected();
 
-    // Настроить состояние элементов диалога
-//    GetDlgItem( IDC_CONNECT_BUTTON          )-> EnableWindow( !lConnected );
+    // Кнопки отключения и подключения устройств
     ui->pushButton_Connect      ->setEnabled( !lConnected );
-//    GetDlgItem( IDC_DISCONNECT_BUTTON       )-> EnableWindow( lConnected );
     ui->pushButton_Disconnect   ->setEnabled( lConnected );
 
-//    GetDlgItem( IDC_COMMUNICATION_BUTTON    )-> EnableWindow( lConnected );
-//    GetDlgItem( IDC_DEVICE_BUTTON           )-> EnableWindow( lConnected );
-//    GetDlgItem( IDC_STREAMPARAMS_BUTTON     )-> EnableWindow( lConnected );
+    // Кнопкидоступа к окнам настройки
+    ui->pushButton_communicationControl ->setEnabled( lConnected );
+    ui->pushButton_deviceControl        ->setEnabled( lConnected );
+    ui->pushButton_imageDtreamControl   ->setEnabled( lConnected );
 
     bool lLocked = false;
     // Если класс состояния уже создан
-    if ( m_poAcquisitionStateManager != NULL )
+    if ( m_poAcquisitionStateManager != 0 )
     {
         lLocked = m_poAcquisitionStateManager->GetState() == PvAcquisitionStateLocked;
     }
 
-    // Установить состояние кнопок
-//    mPlayButton.EnableWindow(   lConnected && !lLocked  );
-//    mStopButton.EnableWindow(   lConnected && lLocked   );
+    // Установить состояние кнопок управления воспроизведением
+    ui->pushButton_Start      ->setEnabled( lConnected && !lLocked  );
+    ui->pushButton_Stop       ->setEnabled( lConnected && lLocked  );
 
     // If not connected, disable the acquisition mode control. If enabled,
     // it will be managed automatically by events from the GenICam parameters
@@ -547,7 +577,7 @@ void ZoomCameraTestWidget::onButtonConnectSlot()
     }
 
     // Если не ОК и ничего не выбрано
-    if ( !lResult.IsOK() || ( lFinder.GetSelected() == NULL ) )
+    if ( !lResult.IsOK() || ( lFinder.GetSelected() == 0 ) )
     {
         return;
     }
@@ -561,8 +591,8 @@ void ZoomCameraTestWidget::onButtonConnectSlot()
     // Получить информацию о выбранном устойстве
     const PvDeviceInfo* lDeviceInfo = lFinder.GetSelected();
 
-    // Если информация не аустая
-    if ( lDeviceInfo != NULL )
+    // Если информация не пустая
+    if ( lDeviceInfo != 0 )
     {
         // Подключить устройство
         Connect( lDeviceInfo );
@@ -570,9 +600,6 @@ void ZoomCameraTestWidget::onButtonConnectSlot()
     // Иначе
     else
     {
-        // Сообщаем о проблемах
-//        QMessageBox( "No device selected." , "Error",
-//                     MB_OK | MB_ICONINFORMATION );
         qDebug() << "No device selected." ;
         return;
     }
@@ -619,4 +646,38 @@ void ZoomCameraTestWidget::onButtonStopSlot()
 
     // Обновить состояние интерфейса
     EnableInterface();
+}
+
+void ZoomCameraTestWidget::onButtonCommCtrlSlot()
+{
+    ShowGenWindow(
+        &m_poCommunicationCtrlWnd,
+        m_poDevice->GetCommunicationParameters(),
+        "Communication Control"  );
+}
+
+void ZoomCameraTestWidget::onButtonDevCtrlSlot()
+{
+    if ( !m_poDevice->IsConnected() )
+    {
+        return;
+    }
+
+    ShowGenWindow(
+        &m_poDeviceCtrlWnd,
+        m_poDevice->GetParameters(),
+        "Device Control"  );
+}
+
+void ZoomCameraTestWidget::onButtonImgStreamCtrlSlot()
+{
+    if ( !m_poDevice->IsConnected() )
+    {
+        return;
+    }
+
+    ShowGenWindow(
+        & m_poStreamParametersCtrlWnd,
+        m_poStream->GetParameters(),
+         "Image Stream Control"  );
 }

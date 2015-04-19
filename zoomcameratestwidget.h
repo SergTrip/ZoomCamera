@@ -80,6 +80,13 @@ public slots:
     // Нажатие кнопки Stop
     void onButtonStopSlot();
 
+    // Нажатие кнопки Communication Control
+    void onButtonCommCtrlSlot();
+    // Нажатие кнопки Device Control
+    void onButtonDevCtrlSlot();
+    // Нажатие кнопки Image Stream Control
+    void onButtonImgStreamCtrlSlot();
+
 protected:
     QRect   m_oClientRect;
 
@@ -97,18 +104,18 @@ protected:
     PvPipeline*         m_poPipeline;
 
     // Указатель на класс потока
-    DisplayThread*      m_poDisplayThread;
+ //   DisplayThread*      m_poDisplayThread;
 
     // Указатели на список окон
     // Device Control
-    PvGenBrowserWnd*    mDeviceWnd;
+    PvGenBrowserWnd*    m_poDeviceCtrlWnd;
     // Communication Control
-    PvGenBrowserWnd*    mCommunicationWnd;
+    PvGenBrowserWnd*    m_poCommunicationCtrlWnd;
     // Image Stream Control
-    PvGenBrowserWnd*    mStreamParametersWnd;
+    PvGenBrowserWnd*    m_poStreamParametersCtrlWnd;
 
     // Объект окна для воспроизведения изображения
-    PvDisplayWnd        m_oDisplay;
+//    PvDisplayWnd        m_oDisplay;
 
     // Указатель на класс состояния получения изображения
     PvAcquisitionStateManager*  m_poAcquisitionStateManager;

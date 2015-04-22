@@ -87,9 +87,14 @@ public slots:
     // Нажатие кнопки Image Stream Control
     void onButtonImgStreamCtrlSlot();
 
-protected:
-    QRect   m_oClientRect;
+    // Слот изменения значения увеличения
+    void onSliderZoomMoveSlot( int value );
 
+private:
+    // Old Zoom Value
+    int m_nOldZoomValue;
+
+protected:
     // Флаг инициализации
     bool    m_bNeedInit;
     // Флаг процесса захвата изображения

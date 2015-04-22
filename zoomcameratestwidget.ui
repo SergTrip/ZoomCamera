@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>636</width>
-    <height>335</height>
+    <width>871</width>
+    <height>431</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,8 +24,8 @@
     <rect>
      <x>220</x>
      <y>10</y>
-     <width>400</width>
-     <height>300</height>
+     <width>640</width>
+     <height>370</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -36,14 +36,14 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>400</width>
-     <height>300</height>
+     <width>640</width>
+     <height>370</height>
     </size>
    </property>
    <property name="maximumSize">
     <size>
-     <width>400</width>
-     <height>300</height>
+     <width>640</width>
+     <height>370</height>
     </size>
    </property>
   </widget>
@@ -145,6 +145,19 @@
    </property>
    <property name="text">
     <string>Device control</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="horizontalSlider_zoom">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>390</y>
+     <width>640</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
    </property>
   </widget>
  </widget>
@@ -271,6 +284,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>horizontalSlider_zoom</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>ZoomCameraTestWidget</receiver>
+   <slot>onSliderZoomMoveSlot(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>539</x>
+     <y>399</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>435</x>
+     <y>215</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onButtonConnectSlot()</slot>
@@ -280,5 +309,6 @@
   <slot>onButtonCommCtrlSlot()</slot>
   <slot>onButtonDevCtrlSlot()</slot>
   <slot>onButtonImgStreamCtrlSlot()</slot>
+  <slot>onSliderZoomMoveSlot(int)</slot>
  </slots>
 </ui>

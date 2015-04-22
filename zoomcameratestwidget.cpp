@@ -15,6 +15,11 @@ ZoomCameraTestWidget::ZoomCameraTestWidget(QWidget *parent) :
 {
     ui->setupUi( this );
 
+    // Настроить слайдер Zoom
+    QSlider*    zoomSlider = ui->horizontalSlider_zoom;
+    // Установить диапазон
+    zoomSlider->setRange( 0, 16384);
+
     // Обнулить указатели
     m_poDevice      = 0;
     m_poStream      = 0;
@@ -23,15 +28,6 @@ ZoomCameraTestWidget::ZoomCameraTestWidget(QWidget *parent) :
 
 ZoomCameraTestWidget::~ZoomCameraTestWidget()
 {
-    // Если был создан экземпляр потока
-//    if ( m_poDisplayThread != 0 )
-//    {
-//        // удалить экземпляр
-//        delete m_poDisplayThread;
-//        // поменять значение
-//        m_poDisplayThread = 0;
-//    }
-
     //
     if ( m_poAcquisitionStateManager != 0 )
     {
@@ -64,10 +60,6 @@ ZoomCameraTestWidget::~ZoomCameraTestWidget()
 
 void ZoomCameraTestWidget::StartStreaming()
 {
-    // Start threads
-//    m_poDisplayThread->Start        ( m_poPipeline, m_poDevice->GetParameters() );
-//    m_poDisplayThread->SetPriority  ( THREAD_PRIORITY_ABOVE_NORMAL              );
-
 
     (ui->widget)->Start        ( m_poPipeline, m_poDevice->GetParameters() );
     (ui->widget)->SetPriority  ( THREAD_PRIORITY_ABOVE_NORMAL              );
@@ -80,12 +72,7 @@ void ZoomCameraTestWidget::StartStreaming()
 
 void ZoomCameraTestWidget::StopStreaming()
 {
-    // Stop display thread
-//    if ( m_poDisplayThread != 0 )
-//    {
-//        m_poDisplayThread->Stop( false );
-//    }
-
+    // Остановить поток отображения
     (ui->widget)->Stop( false );
 
     if ( m_poPipeline != 0 )
@@ -97,11 +84,7 @@ void ZoomCameraTestWidget::StopStreaming()
         }
     }
 
-    // Wait for display thread to be stopped
-//    if ( m_poDisplayThread != 0 )
-//    {
-//        m_poDisplayThread->WaitComplete();
-//    }
+    // Ждать завершения всех операций
     ui->widget->WaitComplete();
 }
 
@@ -113,8 +96,13 @@ void ZoomCameraTestWidget::OnParameterUpdate(PvGenParameter *aParameter)
     // Получить имя параметра для изменения
     aParameter->GetName( lName );
 
-    qDebug() << " ZoomCameraTestWidget::OnParameterUpdate - \
-                    It's may be something IMPOTENT !!!" ;
+    qDebug() << " ZoomCameraTestWidget::OnParameterUpdate" ;
+
+    // Если параметр Zoom
+    if ( lName == "Zoom"   )
+    {
+        qDebug() << " On Zoom Parameter Update ... " ;
+    }
 
     // Если нужно изменить режим отображения и комбо бокс доступен
     if ( ( lName == "AcquisitionMode"   )
@@ -157,40 +145,8 @@ void ZoomCameraTestWidget::OnParameterUpdate(PvGenParameter *aParameter)
 
 void ZoomCameraTestWidget::showEvent(QShowEvent *event)
 {
-    // Вызвать функцию базовго класса
-    // CDialog::OnInitDialog();
-
-    // Получить размеры клиенского окна
-    // GetClientRect( m_oClientRect );
-
     // Отметить, что инициализация уже прошла
     m_bNeedInit = false;
-
-    // Set the icon for this dialog.  The framework does this automatically
-    // when the application's main window is not a dialog
-    // SetIcon(m_hIcon, true);			// Set big icon
-    // SetIcon(m_hIcon, false);         // Set small icon
-
-    // Переменная для хранения размера окна выводв потока
-    //QRect displayRect;
-    // Получаем размеры окна
-    //GetDlgItem( IDC_DISPLAYPOS )->GetClientRect     ( &displayRect );
-    // Преобразовуем в координаты экрана
-    //GetDlgItem( IDC_DISPLAYPOS )->ClientToScreen    ( &displayRect );
-
-    // Преобразовуем в какуто другую координатную базу
-    //ScreenToClient( &displayRect );
-
-    // Создать окно
-    //m_oDisplay.Create             ( GetSafeHwnd(), 10000 );
-
-    // Установить позицию и размеры
-//    m_oDisplay.SetPosition        ( displayRect.left()  ,
-//                                    displayRect.top()   ,
-//                                    displayRect.Width() ,
-//                                    displayRect.Height()    );
-    // Установить цвет фона
-//    m_oDisplay.SetBackgroundColor ( 0x80, 0x80, 0x80 );
 
     EnableInterface();
 }
@@ -650,34 +606,102 @@ void ZoomCameraTestWidget::onButtonStopSlot()
 
 void ZoomCameraTestWidget::onButtonCommCtrlSlot()
 {
-    ShowGenWindow(
-        &m_poCommunicationCtrlWnd,
-        m_poDevice->GetCommunicationParameters(),
-        "Communication Control"  );
+    // Если устройство подключено
+    if ( !m_poDevice->IsConnected() )
+    {
+        // Просто выйти
+        return;
+    }
+
+    // Открыть окно настройки соединения
+    ShowGenWindow(  &m_poCommunicationCtrlWnd               ,
+                    m_poDevice->GetCommunicationParameters(),
+                    "Communication Control"                      );
 }
 
 void ZoomCameraTestWidget::onButtonDevCtrlSlot()
 {
+    // Если устройство подключено
     if ( !m_poDevice->IsConnected() )
     {
+        // Просто выйти
         return;
     }
 
-    ShowGenWindow(
-        &m_poDeviceCtrlWnd,
-        m_poDevice->GetParameters(),
-        "Device Control"  );
+    // Открыть окно настройки устройства
+    ShowGenWindow(  &m_poDeviceCtrlWnd          ,
+                    m_poDevice->GetParameters() ,
+                    "Device Control"                );
 }
 
 void ZoomCameraTestWidget::onButtonImgStreamCtrlSlot()
 {
+    // Если устройство подключено
     if ( !m_poDevice->IsConnected() )
     {
         return;
     }
+    // Открыть окно настройки потока изображений
+    ShowGenWindow(  & m_poStreamParametersCtrlWnd   ,
+                    m_poStream->GetParameters()     ,
+                    "Image Stream Control"              );
+}
 
-    ShowGenWindow(
-        & m_poStreamParametersCtrlWnd,
-        m_poStream->GetParameters(),
-         "Image Stream Control"  );
+void ZoomCameraTestWidget::onSliderZoomMoveSlot(int value)
+{
+
+    // Если устройство подключено
+    if ( !m_poDevice->IsConnected() )
+    {
+        // Просто выйти
+        return;
+    }
+
+    // Получаем массив параметров
+    PvGenParameterArray* lGenDevice = m_poDevice->GetParameters();
+
+    // Если указатель пуст
+    if( lGenDevice == 0 )
+    {
+        // Не удалось получить параметры
+        qDebug() << "Change Zoom: Can't reciev device parameters !!! ";
+    }
+
+    // Get Current Zomm Value from Camera
+    int CurrenZoom = lGenDevice->GetIntegerValue("Zoom", value);
+
+    switch( res.GetCode() )
+    {
+        case PvResult::Code::OK:
+            qDebug() << "Change Zoom: OK..... ";
+            qDebug() << "New Zoom Value: " << value;
+            break;
+
+        case PvResult::Code::NOT_FOUND:
+            qDebug() << "Change Zoom: Parameter nom found !!! ";
+            break;
+    }
+
+    // Calculate a moving speed
+    // int  nNewSpeedValue = value - CurrenZoom;
+
+    // Set a moving speed
+
+    // Start a move
+
+
+    // Пробуем изменить значение
+    PvResult res = lGenDevice->SetIntegerValue("Zoom", value);
+
+    switch( res.GetCode() )
+    {
+        case PvResult::Code::OK:
+            qDebug() << "Change Zoom: OK..... ";
+            qDebug() << "New Zoom Value: " << value;
+            break;
+
+        case PvResult::Code::NOT_FOUND:
+            qDebug() << "Change Zoom: Parameter nom found !!! ";
+            break;
+    }
 }

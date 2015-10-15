@@ -65,11 +65,11 @@ void DisplayThread::OnBufferDisplay( PvBuffer *aBuffer )
     // Если буффер еще не выделен
     if( m_poImageBuffer == 0 )
     {
-        qDebug() <<  "m_poImageBuffer == 0";
+        //qDebug() <<  "m_poImageBuffer == 0";
 
         // Создать новый буффер
         m_poImageBuffer = new PvBuffer( aBuffer->GetPayloadType() );
-        qDebug() << "Payload Type:" << aBuffer->GetPayloadType();
+        //qDebug() << "Payload Type:" << aBuffer->GetPayloadType();
 
         // Если изубражение уже существует
         if ( m_poQtImage != 0 )
@@ -77,14 +77,14 @@ void DisplayThread::OnBufferDisplay( PvBuffer *aBuffer )
             // Очистить изображение
             delete m_poQtImage;
             // Сообщить об этом
-            qDebug() <<  " delete m_poQtImage ";
+            //qDebug() <<  " delete m_poQtImage ";
         }
 
         // Создать мзображение Qt c таким же размером
         m_poQtImage = new QImage( pvImage->GetWidth(), pvImage->GetHeight(), QImage::Format_RGB32 );
 
         // Вывидим размеры нового изображения
-        qDebug() <<  " new QImage" << pvImage->GetWidth() << " x " <<  pvImage->GetHeight();
+        //qDebug() <<  " new QImage" << pvImage->GetWidth() << " x " <<  pvImage->GetHeight();
 
         // Привязываем данные фрейма к озображнию
         res = (m_poImageBuffer->GetImage())->Attach(    m_poQtImage ->bits()        ,
@@ -95,11 +95,11 @@ void DisplayThread::OnBufferDisplay( PvBuffer *aBuffer )
         switch ( res.GetCode() )
         {
             case PvResult::Code::INVALID_PARAMETER:
-                qDebug() <<  "Attach - Invalid parametr";
+                //qDebug() <<  "Attach - Invalid parametr";
                 break;
 
             case PvResult::Code::OK:
-                qDebug() << "Attach - OK";
+                //qDebug() << "Attach - OK";
                 break;
         }
 
@@ -116,7 +116,7 @@ void DisplayThread::OnBufferDisplay( PvBuffer *aBuffer )
                                     m_poQtImage ->bits()            );
 
         // Вывидим размеры нового изображения
-        qDebug() <<  " new Mat" << m_poCVMat->cols << " x " <<  m_poCVMat->rows;
+        //qDebug() <<  " new Mat" << m_poCVMat->cols << " x " <<  m_poCVMat->rows;
 
     }
 
@@ -128,7 +128,7 @@ void DisplayThread::OnBufferDisplay( PvBuffer *aBuffer )
                                                  (m_poImageBuffer->GetImage())  -> GetPixelType()  ) )
     {
         // QMessageBox::warning( this, "Not support", "Not format support");
-        qDebug() << "Not format support";
+        //qDebug() << "Not format support";
 
         return;
     }
@@ -136,26 +136,26 @@ void DisplayThread::OnBufferDisplay( PvBuffer *aBuffer )
     // Коневертируем формат
     res = bufferConverter.Convert( aBuffer, m_poImageBuffer );
 
-    qDebug() <<  " Source format"       << pvImage->GetPixelType() ;
-    qDebug() <<  " Distination format"  << (m_poImageBuffer->GetImage())->GetPixelType();
+    //qDebug() <<  " Source format"       << pvImage->GetPixelType() ;
+    //qDebug() <<  " Distination format"  << (m_poImageBuffer->GetImage())->GetPixelType();
 
     switch ( res.GetCode() )
     {
         case PvResult::Code::INVALID_DATA_FORMAT:
-            qDebug() << "Convertion - Invalid format";
+            //qDebug() << "Convertion - Invalid format";
             break;
 
         case PvResult::Code::GENERIC_ERROR:
-            qDebug() << "Convertion - Generic error";
+            //qDebug() << "Convertion - Generic error";
             break;
 
         case PvResult::Code::OK:
-            qDebug() << "Convertion - OK";
+            //qDebug() << "Convertion - OK";
             break;
     }
 
     // Выведим параметры буфера результата
-    qDebug() <<  " Distination Buffer" << (m_poImageBuffer->GetImage())->GetWidth() << " x " <<  (m_poImageBuffer->GetImage())->GetHeight();
+    //qDebug() <<  " Distination Buffer" << (m_poImageBuffer->GetImage())->GetWidth() << " x " <<  (m_poImageBuffer->GetImage())->GetHeight();
 
     // Ищем лица
     detectAndDraw();
@@ -163,7 +163,7 @@ void DisplayThread::OnBufferDisplay( PvBuffer *aBuffer )
     this->update();
     //this->repaint();
 
-    qDebug() << "Update....";
+    //qDebug() << "Update....";
 }
 
 
@@ -197,9 +197,9 @@ void DisplayThread::paintEvent(QPaintEvent *event)
                                                 this->height(),
                                                 Qt::KeepAspectRatio )   );
 
-        qDebug() << m_poQtImage->width() << " x " << m_poQtImage->height();
+        //qDebug() << m_poQtImage->width() << " x " << m_poQtImage->height();
 
-        qDebug() << "paintEvent !!";
+        //qDebug() << "paintEvent !!";
 //    }
 }
 
@@ -209,8 +209,8 @@ void DisplayThread::showEvent(QShowEvent *event)
      m_poQtImage = new QImage( QSize( this->width(), this->height() ), QImage::Format_RGB32 );
      m_poQtImage->fill( QColor(0x80, 0x80, 0x80));
 
-    qDebug() << " showEvent ";
-    qDebug() << m_poQtImage->width() << " x " << m_poQtImage->height();
+    //qDebug() << " showEvent ";
+    //qDebug() << m_poQtImage->width() << " x " << m_poQtImage->height();
 
 }
 
@@ -234,7 +234,7 @@ void DisplayThread::detectAndDraw()
                                         0|CV_HAAR_SCALE_IMAGE   ,
                                         cv::Size(200, 200)      );
 
-    qDebug() << "Faces number: " << faces.size();
+    // qDebug() << "Faces number: " << faces.size();
 
     // Для каждого лица в списке
     for( size_t i = 0; i < faces.size(); i++ )
@@ -275,6 +275,3 @@ void DisplayThread::detectAndDraw()
 */
     }
 }
-
-
-

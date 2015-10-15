@@ -668,19 +668,19 @@ void ZoomCameraTestWidget::onSliderZoomMoveSlot(int value)
     }
 
     // Get Current Zomm Value from Camera
-    int CurrenZoom = lGenDevice->GetIntegerValue("Zoom", value);
+//    int CurrenZoom = lGenDevice->GetIntegerValue("Zoom", value);
 
-    switch( res.GetCode() )
-    {
-        case PvResult::Code::OK:
-            qDebug() << "Change Zoom: OK..... ";
-            qDebug() << "New Zoom Value: " << value;
-            break;
+//    switch( res.GetCode() )
+//    {
+//        case PvResult::Code::OK:
+//            qDebug() << "Change Zoom: OK..... ";
+//            qDebug() << "New Zoom Value: " << value;
+//            break;
 
-        case PvResult::Code::NOT_FOUND:
-            qDebug() << "Change Zoom: Parameter nom found !!! ";
-            break;
-    }
+//        case PvResult::Code::NOT_FOUND:
+//            qDebug() << "Change Zoom: Parameter nom found !!! ";
+//            break;
+//    }
 
     // Calculate a moving speed
     // int  nNewSpeedValue = value - CurrenZoom;

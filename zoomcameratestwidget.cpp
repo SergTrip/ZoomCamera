@@ -62,7 +62,7 @@ void ZoomCameraTestWidget::StartStreaming()
 {
 
     (ui->widget)->Start        ( m_poPipeline, m_poDevice->GetParameters() );
-    (ui->widget)->SetPriority  ( THREAD_PRIORITY_ABOVE_NORMAL              );
+//   (ui->widget)->SetPriority  ( THREAD_PRIORITY_ABOVE_NORMAL              );
 
     // Start pipeline
     m_poPipeline->Start();
@@ -428,11 +428,13 @@ void ZoomCameraTestWidget::ShowGenWindow(   PvGenBrowserWnd     **aWnd,
     if ( ( *aWnd ) != 0 )
     {
         // Если ???
-        if ( ( *aWnd )->GetHandle() != 0 )
+        // if ( ( *aWnd )->GetHandle() != 0 )
+        if ( ( *aWnd )->GetQWidget() != 0 )
         {
             // Найти виджет с таким хендлом
             QWidget* lWnd = 0;
-            lWnd = QWidget::find( (WId)(( *aWnd )->GetHandle()) );
+            // lWnd = QWidget::find( (WId)(( *aWnd )->GetHandle()) );
+            lWnd = ( *aWnd )->GetQWidget();
 
             // Если виджет нашелся
             if( lWnd != 0)
@@ -459,7 +461,8 @@ void ZoomCameraTestWidget::ShowGenWindow(   PvGenBrowserWnd     **aWnd,
 
     ( *aWnd )->SetTitle             ( PvString( (char*)aTitle.data())    );
     ( *aWnd )->SetGenParameterArray ( aParams               );
-    ( *aWnd )->ShowModeless         ( (HWND)(this->winId()) );
+    // ( *aWnd )->ShowModeless         ( (HWND)(this->winId()) );
+    ( *aWnd )->ShowModeless         ( this );
 }
 
 void ZoomCameraTestWidget::CloseGenWindow(PvGenBrowserWnd **aWnd)
@@ -471,7 +474,7 @@ void ZoomCameraTestWidget::CloseGenWindow(PvGenBrowserWnd **aWnd)
     }
 
     // If the window object exists and is currently created (visible), close/destroy it
-    if ( ( *aWnd )->GetHandle() != 0 )
+    if ( ( *aWnd )->GetQWidget() != 0 )
     {
         ( *aWnd )->Close();
     }

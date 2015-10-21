@@ -14,30 +14,29 @@
 #include <QMessageBox>
 #include <QColor>
 
-#include <opencv/cv.h>
-#include <opencv2/opencv.hpp>
-
 #include <PvDisplayThread.h>
 #include <PvDisplayWnd.h>
 #include <PvImage.h>
 #include <PvPixelType.h>
+#include <PvBuffer.h>
+#include <PvBufferConverter.h>
 
-#include <opencv/cv.h>
-#include <opencv2/opencv.hpp>
+//#include <opencv/cv.h>
+#include "/home/sergey/libs/opencv-3.0.0/include/opencv/cv.h"
+//#include <opencv2/opencv.hpp>
+#include "/home/sergey/libs/opencv-3.0.0/include/opencv2/opencv.hpp"
 
+//#include <opencv2/core/core.hpp>
+#include "/home/sergey/libs/opencv-3.0.0/modules/core/include/opencv2/core.hpp"
+//#include <opencv2/objdetect/objdetect.hpp>
+#include "/home/sergey/libs/opencv-3.0.0/modules/objdetect/include/opencv2/objdetect.hpp"
+
+//#include <opencv2/highgui/highgui.hpp>
 //#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/core/core.hpp>
-
 //#include <opencv2/videoio/videoio.hpp>
 
-#include <opencv2/highgui/highgui.hpp>
-
-#include <opencv2/objdetect/objdetect.hpp>
-
 #define FACE_CASCADE_NAME   "D:\\Dropbox\\Germanij\\Projects\\Faces\\Data\\haarcascades\\haarcascade_frontalface_alt.xml"
-
 //#define FACE_CASCADE_NAME   "../../Data/lbpcascades/lbpcascade_frontalface.xml"
-
 #define EYE_CASCADE_NAME    "../../Data/haarcascades/haarcascade_eye_tree_eyeglasses.xml"
 
 #define FILE_NAME           "../../Data/MyFace.3gp"
@@ -86,4 +85,4 @@ private:
     cv::CascadeClassifier   m_pCVEyeCascade;
 };
 
-#endif DISPLAYTHREAD_H
+#endif // DISPLAYTHREAD_H
